@@ -1,0 +1,80 @@
+---
+title: "WS_AdvancedData_RonaresR"
+author: "BJBerauer"
+date: "09/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First we load packages required during the Workshop
+
+```{r,  message=FALSE, warning=FALSE}
+library(tidyverse) #l oad in the tidyverse (loading multiple packages belonging to the "tidyverse")
+library(lubridate)
+library(rmarkdown)
+library(ggforce)
+library(nlme)
+library(lsmeans)
+library(lme4)
+library(car)
+library(multcomp)
+library(multcompView)
+```
+
+...and set the working directory (path-file where Workshop material was copied in)
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+getwd() # check the working directory 
+#setwd() #set working directory
+```
+
+
+In the first section we will get started with R and commemorate basics.
+
+We can use R as a calculator
+
+```{r,  message=FALSE, warning=FALSE}
+2-4
+
+4/2+4 
+
+4/(2+4) # follows mathematical rules
+
+2*4+4/pi
+
+pi
+```
+
+Please Note that "pi" is stored by R as an object.
+We can also create objects in R 
+
+```{r,  message=FALSE, warning=FALSE}
+a <- 2
+b <- 4
+```
+
+...and do calculations with them.
+
+```{r,  message=FALSE, warning=FALSE}
+a-b
+b/a+b
+b/(a+b)
+a*b+b/pi
+
+d <- c(2,4,6) # vector - chain of multiple "entries" [elements]
+e <- c(2,5,8,11)
+d+e # warning = R is doing an action, but warns you to check whats going on | coercion: R repeats the shorter object 
+
+f <- c("can","be","letters")
+#d+f # Please run this without "#" in front
+
+```
+
+...what happend to "d+f"? And why?
+
+An Object is like a empty box were you can stuff in whatever you want. But there are different levels of organization of the box possible!
+There are manifold classes of objects (e.g. vector, matrix, data.frame, list, tbl,...) and types of elements (e.g. numeric, character, factor, double, integer,...) within an object.
+
