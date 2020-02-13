@@ -57,19 +57,20 @@ d+f #Error = R doesn't know how to execute the task as its of different classes/
 df <- read.csv("Data/Land-use_for_WS.csv") #read in data | Take care of your working directory
 str(df) #check the structure (what are the names of the columns? what is the format of the columns? is there sth odd happening?)
 head(df, 5) #check the first 5 entries of the data-frame
-summary(df)
+summary(df) #quick 7 number summary of dataframe
 
 df$Origin #adress with $ (the "accessor") and the name [in a data.frame columns are "stored" as named vectors]
 df[, 3] #adress an entire column with the position within the dataframe
 df[3] #adress with the position within the dataframe
 
-###QUESTION: similar result but whats the difference?
-###SOLUTION?
-#str(df[, 3]) #vector of a factor with 2 levels
-#str(df[3]) #data.frame
-###
+  ###QUESTION: similar result but whats the difference?
+  ###SOLUTION?
+  #str(df[, 3]) #vector of a factor with 2 levels
+  #str(df[3]) #data.frame
+  ###
 
 df[3,] #adresses an entire row (here: 3) 
+df[3:8, ] #multiple rows (works also for columns in [ , ] format not with $)
 df[3,5] # addresses a specific row & column | order is df[ROW,COLUMN]
 
 
@@ -98,10 +99,10 @@ sum(df$Biomass[df$Origin=="EB" & df$Transplant=="EB"]) #Biomass of the on-site i
 df$CN <- df$C / df$N #divide two vectors of the same length
 df$NP <- df$N / (df$P/10) #similar as above but P is in permille and N in percent -> follow mathematical operations and transform P first
 
-###QUESTION: Calculate total C and total N as product of %element * biomass
-#df$totC <- df$C*df$Biomass
-#df$totN <- df$N*df$Biomass
-###
+  ###QUESTION: Calculate total C and total N as product of %element * biomass
+  #df$totC <- df$C*df$Biomass
+  #df$totN <- df$N*df$Biomass
+  ###
 
 #look again into structure | newly calculated variables are there
 str(df) #but date remains a factor
@@ -113,16 +114,16 @@ str(df)
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
 str(df)
 
-#QUESTION: Whats the difference?
-#ANSWER: the class of the stored vector [POSIXct -vs- Date]
+  #QUESTION: Whats the difference?
+  #ANSWER: the class of the stored vector [POSIXct -vs- Date]
 
 df$monat <- month(df$ts)
 df$jahr <- year(df$ts)
 df$tag <- day(df$ts)
 df$Quartal <- quarter(df$ts, with_year = TRUE) # Function:: quarter, extracts the quarter from your dates (from Lubridate Package) 
 
-###QUESTION: What does "with_year" argument do?
-###ANSWER: Also keeps the year
+  ###QUESTION: What does "with_year" argument do?
+  ###ANSWER: Also keeps the year
 
 df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your dates (from Lubridate Package)
 
@@ -144,9 +145,8 @@ df <- read.csv("Data/Land-use_for_WS.csv")
 
 df <- mutate(df, CN = C / N, NP = N / (P/10))
 
-###QUESTION: Also calculate total C and N
-###SOLUTION: df <- mutate(df, totC = C * Biomass, totN = N * Biomass)
-
+  ###QUESTION: Also calculate total C and N
+  ###SOLUTION: df <- mutate(df, totC = C * Biomass, totN = N * Biomass)
 ###Re-run the time-stamp stuff from above
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
 df$monat <- month(df$ts)
@@ -155,10 +155,11 @@ df$tag <- day(df$ts)
 df$Quartal <- quarter(df$ts, with_year = TRUE) # Function:: quarter, extracts the quarter from your dates (from Lubridate Package) 
 df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your dates (from Lubridate Package)
 
+identical(df, df_base) # we have produced similar output
+
 
 filter(df, Transplant == c("EB", "FE")) #analog operation to subset
-filter(df, Transplant %in% c("EB", "FE")) #analog operation to subset
-###subset(df, df$Transplant %in% c("EB", "FE"))
+filter(df, Transplant %in% c("EB", "FE")) #analog operation to subset | subset(df, df$Transplant %in% c("EB", "FE"))
 filter(df, Transplant %in% c("EB", "FE") & jahr ==2018) #logical operators can be chained as normal
 
 select(df, c(Origin, Biomass))
@@ -178,7 +179,6 @@ handy_df <- df %>% select(Origin, Transplant, Treatment, Biomass, N, ts) %>%
 
 #we can pipe (or chain) multiple operations after each other without retyping a lot of stuff and it also looks nice and clean!
 #Tidyverse-packages know where to look for the variables (in the output of the previous pipe-operation!)
-
 
 
 ###Summarize variables
@@ -208,12 +208,26 @@ df %>%
   filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
   summarize_at(., vars(C, N, P, CN, NP), funs(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = T))) #also works with multiple formulas!
 
-###QUESTION: I don't know who the suggested list works, besides this one? Oo
-#df %>% 
-#filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
-#summarize_at(., vars(C, N, P, CN, NP), list(~mean(., na.rm = TRUE))) 
 
-#This is allready way quicker, shorter and readable than base R soultions! But the output is somehow questionable - all different climate change treatments are lumped together
+#Trying this with the Base R apply approach
+lapply(df[df$Origin=="EB" & df$jahr %in% c(2017,2018), c(9,13:14)], c(mean, sd) , na.rm = T) #clunky base R version - doesnt work as easy...
+
+test.func <- function(x){
+  c(
+  mean = mean(x, na.rm = TRUE),
+  sd = sd(x, na.rm = TRUE)
+  )
+}
+
+lapply(df[df$Origin=="EB" & df$jahr %in% c(2017,2018), c(10:14)], test.func) #You need a helper function in between to make this happen in BaseR
+
+
+  ###QUESTION: I don't know who the suggested list works, besides this one? Oo
+  #df %>% 
+  #filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
+  #summarize_at(., vars(C, N, P, CN, NP), list(~mean(., na.rm = TRUE))) 
+
+#This is allready way quicker, shorter and readable than base R soultions! But the output is somehow (ecological) questionable - all different climate change treatments are lumped together
 #Include grouping now makes it even more efficient and produces a nice output
 
 
@@ -231,7 +245,7 @@ as.data.frame(df_EB) #comparing to the data frame
 
 #2. subsets of tibbles stay tibbles (so a numeric vector is stored as a "special kind of data frame" needed for the Tidyverse operations)
 class(df[ ,9]) #class of biomass -> numeric
-class(as_tibble(df[ ,9])) #class is a tibble
+class(as_tibble(df[ ,9])) #class is a tibble (besides tbl of a vector being somehow "non-sense")
 
 #3. tibbles can store complex entries (behaves a little like a list)
 
@@ -547,6 +561,72 @@ My.list.3 <- My.list %>%
                   sm_15 = rowMeans(.[c(2,5)] , na.rm = TRUE)))
 
 
+#####
+#Loop - Soil Moisture Bucketmodel
+#####
+moist <- My.list.3 %>%
+  map_df(., ~cbind(.[-c(1:5)]))
+str(moist)
+moist$SiteID <- substr(moist$SiteID,1,8) #get rid of unneccessary "dt" at the end
+
+moist <- separate(moist, SiteID, into = c("Transplant","Origin", "Treatment"), sep = "_", remove = TRUE) #seperate the SiteID code into Origin, Transplant and Treatment
+
+moist <- moist %>%
+  mutate_at(., vars(c(Origin, Transplant, Treatment)), funs(as.factor(.))) %>% #Transform the new generated "character" into "factor"
+  mutate_at(., vars(c(sm_all, sm_05, sm_15)), funs(.*100)) #transform soilmoisture measurements into %
+
+#Read in Soil characteristics
+soil <- read.csv2("Data/SoilCharacteristics.csv") #SoilCharacteristics | Server->SUSALPS->Publications->LandUse->Data
+soil <- soil[c(1:3), ] 
+names(soil) #Bulkdensity [g/cm³], OragnicMatter (OM) kgC/m², SOC [%], pH [CaCl2], WiltingPoint (WP) [%], FieldCapacity (FC) [%]
+colnames(soil) <- c("Site", "Origin", "Clay5", "Silt5", "Sand5", "Clay15", "Silt15", "Sand15", "Clay", "Silt", "Sand",
+                    "Bulk.Density5", "Bulk.Density15", "Bulk.Density", "OM5", "OM15", "OM",
+                    "SOC5", "SOC15", "SOC", "Type", "pH5", "pH15",  "pH",
+                    "WP5","WP15", "WP", "FC5", "FC15","FC")
+
+moist <- merge(moist, soil[ ,c(2,25:30)], by="Origin") #merge WiltingPoint and FiledCapacity from "soil characteristics" into soilmoisture
+str(moist)
+
+moist <- moist[ ,c(1:7, 10, 8, 9 ,13, 11, 12)] #reorder
+str(moist)
+
+###
+#EXPLAIN WETNESS-INDEX
+###
+
+test <- moist
+
+str(test)
+test$Wet <- (test$sm_all - test$FC) / (test$WP - test$FC)
+
+test %>% transmute_at(., vars(sm_all, sm_05, sm_15), funs(if_else(.<=FC, .== FC, .  <-  . )))
+####need to get a small loop in here, get the code going for one parameter and then write the loop around it
+moist$sm_all >= moist$FC #soils can't store more water then "field capacity" (its full at field capacity, the rest will run through)
+
+#get fucking rid of the stupid NAs!
+for(i in 5:7){
+  for(j in 1:nrow(moist)){
+    if (moist[j,i]>=moist[j,i+2*3]) moist[j,i] <- moist[j,i+2*3]
+  }
+}
+
+
+
+str(moist)
+if (moist[ ,5]>=moist[ ,5+2*3]) moist[ ,5] <- moist[ ,5+2*3]
+(moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
+
+for (i in 5:7) {
+  tmp <- moist
+  for (j in 1:nrow(tmp)) {
+    if (tmp[j ,i]>=tmp[j ,i+2*3]) tmp[j ,i] <- tmp[ ,i+2*3]
+    (tmp[ ,i]-tmp[ ,i+3])/(tmp[ ,i+2*3]-tmp[ ,i+3])
+  }
+}
+
+tmp <- moist
+if (tmp[ ,5]>=tmp[ ,5+2*3]) tmp[ ,5] <- tmp[ ,5+2*3]
+(moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
 
 ####
 ##Graph functions
@@ -765,67 +845,6 @@ map(1:5, graph_fun)
 
 #  You could also think about making a vector for the plot title...
 
-#####
-#Loop - Soil Moisture Bucketmodel
-#####
-moist <- My.list.3 %>%
-  map_df(., ~cbind(.[-c(1:5)]))
-str(moist)
-moist$SiteID <- substr(moist$SiteID,1,8) #get rid of unneccessary "dt" at the end
-
-
-moist <- separate(moist, SiteID, into = c("Transplant","Origin", "Treatment"), sep = "_", remove = TRUE) #seperate the SiteID code into Origin, Transplant and Treatment
-
-moist <- moist %>%
-  mutate_at(., vars(c(Origin, Transplant, Treatment)), funs(as.factor(.))) %>% #Transform the new generated "character" into "factor"
-  mutate_at(., vars(c(sm_all, sm_05, sm_15)), funs(.*100)) #transform soilmoisture measurements into %
-
-#Read in Soil characteristics
-soil <- read.csv2("Data/SoilCharacteristics.csv") #SoilCharacteristics | Server->SUSALPS->Publications->LandUse->Data
-soil <- soil[c(1:3), ] 
-names(soil) #Bulkdensity [g/cm³], OragnicMatter (OM) kgC/m², SOC [%], pH [CaCl2], WiltingPoint (WP) [%], FieldCapacity (FC) [%]
-colnames(soil) <- c("Site", "Origin", "Clay5", "Silt5", "Sand5", "Clay15", "Silt15", "Sand15", "Clay", "Silt", "Sand",
-                    "Bulk.Density5", "Bulk.Density15", "Bulk.Density", "OM5", "OM15", "OM",
-                    "SOC5", "SOC15", "SOC", "Type", "pH5", "pH15",  "pH",
-                    "WP5","WP15", "WP", "FC5", "FC15","FC")
-
-moist <- merge(moist, soil[ ,c(2,25:30)], by="Origin") #merge WiltingPoint and FiledCapacity from "soil characteristics" into soilmoisture
-str(moist)
-
-moist <- moist[ ,c(1:7, 10,8,9,13,11,12)] #reorder
-str(moist)
-
-###
-#EXPLAIN WETNESS-INDEX
-###
-
-####need to get a small loop in here, get the code going for one parameter and then write the loop around it
-moist$sm_all >= moist$FC #soils can't store more water then "field capacity" (its full at field capacity, the rest will run through)
-
-#get fucking rid of the stupid NAs!
-for(i in 5:7){
-  for(j in 1:nrow(moist)){
-    if (moist[j,i]>=moist[j,i+2*3]) moist[j,i] <- moist[j,i+2*3]
-  }
-}
-
-
-
-str(moist)
-if (moist[ ,5]>=moist[ ,5+2*3]) moist[ ,5] <- moist[ ,5+2*3]
-(moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
-
-for (i in 5:7) {
-  tmp <- moist
-  for (j in 1:nrow(tmp)) {
-    if (tmp[j ,i]>=tmp[j ,i+2*3]) tmp[j ,i] <- tmp[ ,i+2*3]
-    (tmp[ ,i]-tmp[ ,i+3])/(tmp[ ,i+2*3]-tmp[ ,i+3])
-  }
-}
-
-tmp <- moist
-if (tmp[ ,5]>=tmp[ ,5+2*3]) tmp[ ,5] <- tmp[ ,5+2*3]
-(moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
 
 ###
 #NIRS
