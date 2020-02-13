@@ -4,8 +4,6 @@
 ### BonaRes-R-Group | Authors
 ###################################################
 
-#JUST A TEST IF I CAN WORK IN HERE
-
 library(tidyverse) #load in the tidyverse (loading multiple packages belonging to the "tidyverse")
 # library(magrittr)
 library(lubridate)
@@ -54,7 +52,7 @@ d+f #Error = R doesn't know how to execute the task as its of different classes/
 
 ## Load in Data
 
-  ### Explain briefly the SUSALPS-Land-Use experiment
+### Explain briefly the SUSALPS-Land-Use experiment
 
 df <- read.csv("Data/Land-use_for_WS.csv") #read in data | Take care of your working directory
 str(df) #check the structure (what are the names of the columns? what is the format of the columns? is there sth odd happening?)
@@ -65,11 +63,11 @@ df$Origin #adress with $ (the "accessor") and the name [in a data.frame columns 
 df[, 3] #adress an entire column with the position within the dataframe
 df[3] #adress with the position within the dataframe
 
-  ###QUESTION: similar result but whats the difference?
-  ###SOLUTION?
-  #str(df[, 3]) #vector of a factor with 2 levels
-  #str(df[3]) #data.frame
-  ###
+###QUESTION: similar result but whats the difference?
+###SOLUTION?
+#str(df[, 3]) #vector of a factor with 2 levels
+#str(df[3]) #data.frame
+###
 
 df[3,] #adresses an entire row (here: 3) 
 df[3,5] # addresses a specific row & column | order is df[ROW,COLUMN]
@@ -100,10 +98,10 @@ sum(df$Biomass[df$Origin=="EB" & df$Transplant=="EB"]) #Biomass of the on-site i
 df$CN <- df$C / df$N #divide two vectors of the same length
 df$NP <- df$N / (df$P/10) #similar as above but P is in permille and N in percent -> follow mathematical operations and transform P first
 
-  ###QUESTION: Calculate total C and total N as product of %element * biomass
-  #df$totC <- df$C*df$Biomass
-  #df$totN <- df$N*df$Biomass
-  ###
+###QUESTION: Calculate total C and total N as product of %element * biomass
+#df$totC <- df$C*df$Biomass
+#df$totN <- df$N*df$Biomass
+###
 
 #look again into structure | newly calculated variables are there
 str(df) #but date remains a factor
@@ -115,16 +113,16 @@ str(df)
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
 str(df)
 
-  #QUESTION: Whats the difference?
-  #ANSWER: the class of the stored vector [POSIXct -vs- Date]
+#QUESTION: Whats the difference?
+#ANSWER: the class of the stored vector [POSIXct -vs- Date]
 
 df$monat <- month(df$ts)
 df$jahr <- year(df$ts)
 df$tag <- day(df$ts)
 df$Quartal <- quarter(df$ts, with_year = TRUE) # Function:: quarter, extracts the quarter from your dates (from Lubridate Package) 
 
-  ###QUESTION: What does "with_year" argument do?
-  ###ANSWER: Also keeps the year
+###QUESTION: What does "with_year" argument do?
+###ANSWER: Also keeps the year
 
 df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your dates (from Lubridate Package)
 
@@ -146,8 +144,8 @@ df <- read.csv("Data/Land-use_for_WS.csv")
 
 df <- mutate(df, CN = C / N, NP = N / (P/10))
 
-  ###QUESTION: Also calculate total C and N
-  ###SOLUTION: df <- mutate(df, totC = C * Biomass, totN = N * Biomass)
+###QUESTION: Also calculate total C and N
+###SOLUTION: df <- mutate(df, totC = C * Biomass, totN = N * Biomass)
 
 ###Re-run the time-stamp stuff from above
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
@@ -160,7 +158,7 @@ df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your date
 
 filter(df, Transplant == c("EB", "FE")) #analog operation to subset
 filter(df, Transplant %in% c("EB", "FE")) #analog operation to subset
-  ###subset(df, df$Transplant %in% c("EB", "FE"))
+###subset(df, df$Transplant %in% c("EB", "FE"))
 filter(df, Transplant %in% c("EB", "FE") & jahr ==2018) #logical operators can be chained as normal
 
 select(df, c(Origin, Biomass))
@@ -175,8 +173,8 @@ clunky_df$totN <- clunky_df$N * clunky_df$Biomass
 
 #The pipe: %>% - chaining of multiple operations
 handy_df <- df %>% select(Origin, Transplant, Treatment, Biomass, N, ts) %>%
-                   filter(Biomass>=80) %>%
-                   mutate(totN = N * Biomass)
+  filter(Biomass>=80) %>%
+  mutate(totN = N * Biomass)
 
 #we can pipe (or chain) multiple operations after each other without retyping a lot of stuff and it also looks nice and clean!
 #Tidyverse-packages know where to look for the variables (in the output of the previous pipe-operation!)
@@ -201,7 +199,7 @@ df %>%
   summarize(sumBM = sum(Biomass), sumN = sum(totN, na.rm = TRUE), meanN = mean(N, na.rm = TRUE)) #you can put mutliple formulas in here, of different types, complexity etc.
 
 #same operations for multiple variables can also be done!
-  ###Explain the DOT (.)
+###Explain the DOT (.)
 df %>% 
   filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
   summarize_at(., vars(C, N, P, CN, NP), funs(mean = mean(., na.rm = TRUE))) 
@@ -210,10 +208,10 @@ df %>%
   filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
   summarize_at(., vars(C, N, P, CN, NP), funs(mean = mean(., na.rm = TRUE), sd = sd(., na.rm = T))) #also works with multiple formulas!
 
-  ###QUESTION: I don't know who the suggested list works, besides this one? Oo
-  #df %>% 
-    #filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
-    #summarize_at(., vars(C, N, P, CN, NP), list(~mean(., na.rm = TRUE))) 
+###QUESTION: I don't know who the suggested list works, besides this one? Oo
+#df %>% 
+#filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
+#summarize_at(., vars(C, N, P, CN, NP), list(~mean(., na.rm = TRUE))) 
 
 #This is allready way quicker, shorter and readable than base R soultions! But the output is somehow questionable - all different climate change treatments are lumped together
 #Include grouping now makes it even more efficient and produces a nice output
@@ -260,15 +258,15 @@ p + geom_point(aes(color = Transplant, shape = Origin))
 
 # everything gets layered on top of each other [dots are still there - see very top/bottom of the violins]
 p + geom_point(aes(color = Transplant))+
-    geom_violin()
+  geom_violin()
 
-  ###QUESTION: How to solve that everything is layered on top of each other?
-  ###ANSWER: Either change the order
+###QUESTION: How to solve that everything is layered on top of each other?
+###ANSWER: Either change the order
 p +
   geom_violin()+
   geom_point(aes(color = Transplant))
-  
-  ###ANSWER: Or remove the fill of the geom_violine (set it to "none")
+
+###ANSWER: Or remove the fill of the geom_violine (set it to "none")
 p +
   geom_point(aes(color = Transplant))+
   geom_violin(fill = "none") 
@@ -292,8 +290,8 @@ ggplot(df_1718, aes(x= jahr2, y= Biomass, color = Transplant))+
                position=position_dodge(1),
                dotsize = .5)
 
-  ###QUESTION: Outline of the Dots is coloured by Transplant but not the fill. How to solve this?
-  ###ANSWER: define the fill aes for geom_dotplot
+###QUESTION: Outline of the Dots is coloured by Transplant but not the fill. How to solve this?
+###ANSWER: define the fill aes for geom_dotplot
 p <- ggplot(df_1718, aes(x= jahr2, y= Biomass, color = Transplant))+
   geom_violin(fill = "none",
               position=position_dodge(1))+
@@ -308,11 +306,11 @@ p + scale_color_manual(values = c("grey30", "grey55", "grey80"),
                        name = "What ever")
 
 
-  ###QUESTION: How to change the fill?
-  ###ANSWER: Works similar
+###QUESTION: How to change the fill?
+###ANSWER: Works similar
 p + scale_fill_manual(values = c("grey30", "grey55", "grey80"),
-                       breaks = c("EB", "FE", "GW"),
-                       name = "What ever")
+                      breaks = c("EB", "FE", "GW"),
+                      name = "What ever")
 
 p + scale_fill_brewer(type = "div", 
                       palette = "Spectral")
@@ -419,12 +417,12 @@ n <- c(6, 3, 7, 2, 10)
 
 #TASK: You want to add 1 and substract 1 from each number
 
-  # vector for + and - 1
-  m <- c(1, -1)
+# vector for + and - 1
+m <- c(1, -1)
 
 #QUESTION: What happens when you try n + m?
-  
-  n + m
+
+n + m
 
 #ANSWER:
 #Essentially what happened was: 
@@ -588,7 +586,7 @@ ST.filter = levels(My.data$Treatment)
 fun2 <- function(x) { 
   My.data %>% 
     filter(Treatment == x) %>% # x is the placeholder for the soil type level
-  ggplot() + 
+    ggplot() + 
     aes(ts, CN , col = Transplant) + 
     geom_point() + 
     theme_bw() + 
@@ -653,7 +651,7 @@ graph_fun = function(x) {
     ylab(O[2]~(mu*l~ hr^-1)) +
     xlab("Incubation time (hrs)") +
     facet_wrap_paginate(vars(Date, Channel, Sample_ID), ncol = 3, nrow = 3, page = x)
-    # note that x is the place holder for number of pages
+  # note that x is the place holder for number of pages
 }
 
 # I know that there shouldn't be more than 5 pages worth of graphs
@@ -692,7 +690,7 @@ head(Chrono_mean)
 
 
 #Basic graph code: 
-  
+
 Chrono_mean %>% 
   ggplot() + 
   aes(Age, Ctot.pc_mean, col = Land.use) + 
@@ -707,7 +705,7 @@ Chrono_mean %>%
 #To make a similar graph for the next variable, 6 parts of the code need to be changed. 
 
 #This is very tedious! 
-  
+
 #  How to automate? Change the layout of the data...
 
 #Gather the table into a long format with separate columns for the variable, mean and sd in order to automate making the graphs.
@@ -727,7 +725,7 @@ head(Chrono_graph)
 
 
 #Code to produce automated graphs: 
-  
+
 # create a vector for axis labels for your graphs including units
 # this must be in the same order as your vars vector!
 # the expression() function allows for special characters, sub- and superscript 
@@ -764,7 +762,7 @@ map(1:5, graph_fun)
 
 
 #Voila! 
-  
+
 #  You could also think about making a vector for the plot title...
 
 #####
