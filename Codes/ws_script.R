@@ -13,8 +13,7 @@ library(nlme)
 library(lsmeans)
 library(lme4)
 library(car)
-library(multcomp)
-library(multcompView)
+
 
 getwd()#Check the working directory 
 setwd() #set working directory to the folder you pasted all materials
@@ -503,7 +502,8 @@ sm_list %>%
 
 files_names <- list.files(path = "Jessica_clayton/Markdown_pdf/Soil_Moisture/",  pattern = "*.csv")
 All_data <- map_df(files_names, ~read.csv(paste0("Jessica_clayton/Markdown_pdf/Soil_Moisture/" , .)))
-head(All_data, 5)
+str(All_data)
+
 #after all having the same format we can bind them together
 
 
@@ -558,7 +558,7 @@ My.list.3 <- My.list %>%
 
 # define which columns you want to plot against x
 My.data <- df_1718
-vars <- names(My.data)[9:16]
+vars <- names(My.data)[9:14]
 
 # make a function with ggplot where y is the placeholder for your y variable:
 fun1.1 <- function(y) { 
@@ -602,16 +602,16 @@ map(ST.filter, fun2)
 
 fun2 <- function(x) { 
   My.data %>% 
-    filter(Treatment == x) %>% # x is the placeholder for the soil type level
+    filter(Treatment == x) %>% # x is the placeholder for the different treatments
     ggplot() + 
     aes(ts, CN , col = Transplant) + 
     geom_point() + 
     theme_bw() + 
     xlab("Date") + 
-    ggtitle(x)+ # don't forget to make a title so you know which soil type is being shown
+    ggtitle(x)+ # don't forget to make a title so you know which treatment is being shown
     facet_wrap(~Origin)
   
-  # create a unique file name by using x as placeholder soil type in the file name
+  # create a unique file name by using x as placeholder for treatment in the file name
   ggsave(paste0("Jessica_clayton/Markdown_pdf/Result_Graph/CN_", x, ".png"))   
 }
 
@@ -802,6 +802,15 @@ str(moist)
 ####need to get a small loop in here, get the code going for one parameter and then write the loop around it
 moist$sm_all >= moist$FC #soils can't store more water then "field capacity" (its full at field capacity, the rest will run through)
 
+#get fucking rid of the stupid NAs!
+for(i in 5:7){
+  for(j in 1:nrow(moist)){
+    if (moist[j,i]>=moist[j,i+2*3]) moist[j,i] <- moist[j,i+2*3]
+  }
+}
+
+
+
 str(moist)
 if (moist[ ,5]>=moist[ ,5+2*3]) moist[ ,5] <- moist[ ,5+2*3]
 (moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
@@ -835,7 +844,8 @@ lsmeans(mod_prot, pairwise ~Treatment|dT ,adjust = "tukey") #or within a site co
 
 #And we want to know this for both sites of origins, both years and the three (Ash,Fat,Protein) parameters of forage quality
 # 2*2*3 -> 12 times this code... prone to copy and paste errors so we might automate this
-
+library(multcomp)
+library(multcompView)
 
 Mod_climXtrt_effect_byYear <- data.frame(NULL)
 cSigtrtGathered <- data.frame(NULL)
