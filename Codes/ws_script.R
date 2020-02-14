@@ -604,15 +604,30 @@ test %>% transmute_at(., vars(sm_all, sm_05, sm_15), funs(if_else(.<=FC, .== FC,
 moist$sm_all >= moist$FC #soils can't store more water then "field capacity" (its full at field capacity, the rest will run through)
 
 #get fucking rid of the stupid NAs!
+moist[is.na(moist)] <- NA
+
 for(i in 5:7){
   for(j in 1:nrow(moist)){
     if (moist[j,i]>=moist[j,i+2*3]) moist[j,i] <- moist[j,i+2*3]
   }
 }
+moist <- test
+moist[is.na(moist)] <- NA
 
+for(i in 5:7){
+  for(j in 1:nrow(moist)){
+    if (is.na(moist[j,i]){
+      moist[j,i] <- NA
+    }
+    else {
+      moist[j, i]>=moist[j, i+2*3] moist[j,i] <- moist[j, i+2*3]
+    }
+  }
+}
 
-
+!is.na(moist[j,i])
 str(moist)
+
 if (moist[ ,5]>=moist[ ,5+2*3]) moist[ ,5] <- moist[ ,5+2*3]
 (moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
 
@@ -847,7 +862,7 @@ map(1:5, graph_fun)
 
 
 ###
-#NIRS
+#Statistic & Plot - automation with NIRS results
 ###
 nirs <- read.csv("Data/NIRS_WS.csv")
 nirs$year <- as.factor(nirs$year)
@@ -958,6 +973,7 @@ cSig <- cSig %>%
 cSig <- as.data.frame(cSig)
 str(cSig) #now everything is as desired
 
+##Plotting
 label_y <- c(bar(x)~"Ash [%]", bar(x)~"Fat [%]", bar(x)~"Protein [%]") #create a label-vector
 for(r in levels(cSig$Response)){
   for(i in levels(cSig$year)){
@@ -977,6 +993,38 @@ for(r in levels(cSig$Response)){
   }
 }
 
+
+library(grid)
+library(gridExtra)
+library(ggpubr)
+library(cowplot)
+
+#Arrange 2 Plots in one panel
+grid.arrange(pProt_2017, pProt_2018, nrow=1) #from grid.Extra
+
+ggarrange(pProt_2017 + rremove("x.text") , pProt_2018 , nrow = 2, ncol = 1, legend = "none") #ggbur
+
+#arrange multiple plots
+ggarrange(pProt_2017 + rremove("x.text") , pProt_2018 + rremove("x.text") , pAsh_2017 + rremove("x.text") , pAsh_2018 + rremove("x.text"),pFat_2017 , pFat_2018 , nrow = 3, ncol = 2, legend = "none") #ggbur
+
+#change the size relationship between columns (width)
+ggarrange(pProt_2017 + rremove("x.text") , pProt_2018 + rremove("x.text") , pAsh_2017 + rremove("x.text") , pAsh_2018 + rremove("x.text"),pFat_2017 , pFat_2018 , nrow = 3, ncol = 2, legend = "none", widths = c(2,1)) #ggbur
+
+#change the size relationship between rows (heights)
+ggarrange(pProt_2017 + rremove("x.text") , pProt_2018 + rremove("x.text") , pAsh_2017 + rremove("x.text") , pAsh_2018 + rremove("x.text"),pFat_2017 , pFat_2018 , nrow = 3, ncol = 2, legend = "none", heights = c(1,2,4)) #ggbur
+
+#arrange multiple plots with different sizes [cowplot]
+ggdraw()+
+  draw_plot(pProt_2017, x = 0 , y=0.5, width = 0.5, height = 0.5)+
+  draw_plot(pAsh_2017, x = 0.5 , y=0.5, width = 0.5, height = 0.5)+
+  draw_plot(pFat_2017, x = 0 , y=0, width = 1, height = 0.5)
+
+#and add a label to them
+ggdraw()+
+  draw_plot(pProt_2017, x = 0 , y=0.5, width = 0.5, height = 0.5)+
+  draw_plot(pAsh_2017, x = 0.5 , y=0.5, width = 0.5, height = 0.5)+
+  draw_plot(pFat_2017, x = 0 , y=0, width = 1, height = 0.5)+
+  draw_plot_label(label = c("A","B","C"), x = c(0, 0.5, 0), y = c(1,1,0.5))
 
 
 #####
