@@ -63,11 +63,11 @@ df$Origin #adress with $ (the "accessor") and the name [in a data.frame columns 
 df[, 3] #adress an entire column with the position within the dataframe
 df[3] #adress with the position within the dataframe
 
-  ###QUESTION: similar result but whats the difference?
-  ###SOLUTION?
-  #str(df[, 3]) #vector of a factor with 2 levels
-  #str(df[3]) #data.frame
-  ###
+###QUESTION: similar result but whats the difference?
+
+
+
+
 
 df[3,] #adresses an entire row (here: 3) 
 df[3:8, ] #multiple rows (works also for columns in [ , ] format not with $)
@@ -99,10 +99,10 @@ sum(df$Biomass[df$Origin=="EB" & df$Transplant=="EB"]) #Biomass of the on-site i
 df$CN <- df$C / df$N #divide two vectors of the same length
 df$NP <- df$N / (df$P/10) #similar as above but P is in permille and N in percent -> follow mathematical operations and transform P first
 
-  ###QUESTION: Calculate total C and total N as product of %element * biomass
-  #df$totC <- df$C*df$Biomass
-  #df$totN <- df$N*df$Biomass
-  ###
+###QUESTION: Calculate total C and total N as product of %element * biomass
+
+
+
 
 #look again into structure | newly calculated variables are there
 str(df) #but date remains a factor
@@ -114,16 +114,16 @@ str(df)
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
 str(df)
 
-  #QUESTION: Whats the difference?
-  #ANSWER: the class of the stored vector [POSIXct -vs- Date]
+#QUESTION: Whats the difference?
+
 
 df$monat <- month(df$ts)
 df$jahr <- year(df$ts)
 df$tag <- day(df$ts)
 df$Quartal <- quarter(df$ts, with_year = TRUE) # Function:: quarter, extracts the quarter from your dates (from Lubridate Package) 
 
-  ###QUESTION: What does "with_year" argument do?
-  ###ANSWER: Also keeps the year
+###QUESTION: What does "with_year" argument do?
+
 
 df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your dates (from Lubridate Package)
 
@@ -134,8 +134,8 @@ ts_diff <- int_diff(unique(df$ts))
 str(ts_diff)
 str(ddays(x = 1))
 int_length(ts_diff)/ddays(x = 1) #Error - format don't match
-int_length(ts_diff)/86400
-###Not familiar with package!
+int_length(ts_diff)/86400 # just manually extract the number of seconds per day to calculate difference between time steps
+###Admit, I am not familiar with this package!
 
 #####
 #TIDYVERSE
@@ -145,8 +145,8 @@ df <- read.csv("Data/Land-use_for_WS.csv")
 
 df <- mutate(df, CN = C / N, NP = N / (P/10))
 
-  ###QUESTION: Also calculate total C and N
-  ###SOLUTION: df <- mutate(df, totC = C * Biomass, totN = N * Biomass)
+###QUESTION: Also calculate total C and N
+
 ###Re-run the time-stamp stuff from above
 df$ts <- dmy(df$Datum) #dmy, ymd, mdy ... letters of command need to fit the format of your charactor or vector arrangement | not in posixCT format
 df$monat <- month(df$ts)
@@ -155,7 +155,7 @@ df$tag <- day(df$ts)
 df$Quartal <- quarter(df$ts, with_year = TRUE) # Function:: quarter, extracts the quarter from your dates (from Lubridate Package) 
 df$DOY <- yday(df$ts) # Function:: yday, extracts the day of year from your dates (from Lubridate Package)
 
-identical(df, df_base) # we have produced similar output
+identical(df, df_base) # to check: we have produced similar output
 
 
 filter(df, Transplant == c("EB", "FE")) #analog operation to subset
@@ -187,7 +187,7 @@ lapply(df[df$Origin=="EB" & df$jahr %in% c(2017,2018), c(9,13:14)], mean, na.rm 
 
 df %>% 
   filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
-  summarize(meanBM = mean(Biomass), meanCN = mean(CN), meanNP = mean(NP))
+  summarize(meanBM = mean(Biomass), meanCN = mean(CN), meanNP = mean(NP)) 
 ###QUESTION: what went wrong?
 
 df %>% 
@@ -215,18 +215,18 @@ lapply(df[df$Origin=="EB" & df$jahr %in% c(2017,2018), c(9,13:14)], c(mean, sd) 
 
 test.func <- function(x){
   c(
-  mean = mean(x, na.rm = TRUE),
-  sd = sd(x, na.rm = TRUE)
+    mean = mean(x, na.rm = TRUE),
+    sd = sd(x, na.rm = TRUE)
   )
 }
 
 lapply(df[df$Origin=="EB" & df$jahr %in% c(2017,2018), c(10:14)], test.func) #You need a helper function in between to make this happen in BaseR
 
 
-  ###QUESTION: I don't know who the suggested list works, besides this one? Oo
-  #df %>% 
-  #filter(Origin == "EB" & jahr %in% c(2017,2018)) %>%
-  #summarize_at(., vars(C, N, P, CN, NP), list(~mean(., na.rm = TRUE))) 
+
+
+
+
 
 #This is allready way quicker, shorter and readable than base R soultions! But the output is somehow (ecological) questionable - all different climate change treatments are lumped together
 #Include grouping now makes it even more efficient and produces a nice output
@@ -321,7 +321,7 @@ p + scale_color_manual(values = c("grey30", "grey55", "grey80"),
 
 
 ###QUESTION: How to change the fill?
-###ANSWER: Works similar
+###ANSWER: Set them manually. Works similar as for "color"
 p + scale_fill_manual(values = c("grey30", "grey55", "grey80"),
                       breaks = c("EB", "FE", "GW"),
                       name = "What ever")
@@ -495,7 +495,7 @@ SM_gather <- Reduce(function(x,y) merge(x,y,by="Date", all=TRUE),sm_little)
 files_names <- list.files(path = "Data/SoilMoisture",  pattern = "*.csv")
 
 # (this only works if the tables have identical column names and dimensions)
-All_data <- map_df(files_names, ~read.csv2(paste0("Data/SoilMoisture/" , .)))# !Take care of the workingdirectory pathway! - Full..names pastes the path(expansion) before the name
+All_data <- map_df(files_names, ~read.csv2(paste0("Data/SoilMoisture/" , .)))
 head(All_data, 5)
 #Check the result | Works but not senseful!
 
@@ -554,7 +554,7 @@ My.list.2 <- map(My.list.2, ~ select(.x, -Date))
 My.list.3 <- My.list %>% 
   map(., ~ mutate(.x, New.Date = as.Date(Date,  format = "%d.%m.%Y"))) %>% # Change date
   map(., ~ select(.x, -Date)) %>% # remove column
-  map(., ~ mutate(.x, sm_all = rowMeans(.[1:5] , na.rm = TRUE), # calculate senseful means of soil moisture
+  map(., ~ mutate(.x, sm_all = rowMeans(.[1:5] , na.rm = TRUE),# calculate senseful means of soil moisture
                   sm_05 = rowMeans(.[c(1,3,4)] , na.rm = TRUE),
                   sm_15 = rowMeans(.[c(2,5)] , na.rm = TRUE)))
 
@@ -613,8 +613,8 @@ for(i in 5:7){
 moist <- test
 moist[is.na(moist)] <- NA
 
-for (i in 5:7){
-  for (j in 1:nrow(moist)){
+for(i in 5:7){
+  for(j in 1:nrow(moist)){
     if (is.na(moist[j,i]){
       moist[j,i] <- NA
     }
@@ -642,9 +642,10 @@ tmp <- moist
 if (tmp[ ,5]>=tmp[ ,5+2*3]) tmp[ ,5] <- tmp[ ,5+2*3]
 (moist[ ,5]-moist[ ,5+3])/(moist[ ,5+2*3]-moist[ ,5+3])
 
-####
-##Graph functions
-####
+
+###
+# Automated Graphical functions
+###
 
 #For graph automation using functions, map and ggplot2
 
@@ -710,6 +711,7 @@ fun2 <- function(x) {
 }
 
 map(ST.filter, fun2)
+
 
 
 # More automated graph options: 
@@ -855,8 +857,6 @@ map(1:5, graph_fun)
 
 
 
-
-
 #Voila! 
 
 #  You could also think about making a vector for the plot title...
@@ -898,7 +898,7 @@ for (i in 5:10)  local({
                        breaks = c("Ctrl", "+1", "+3"),
                        name = "Climatic\n change")+
     scale_x_continuous(breaks = c(2017, 2018))+
-    theme(legend.position = "none")+
+    #theme(legend.position = "none")+
     labs(x="Year", y=label_y_df[[i-4]])
   ls_graph[[i-4]] <<- tmp_graph
   names(ls_graph)[i-4] <- paste0(colnames(df_plot_EB)[i])
@@ -943,19 +943,19 @@ ggdraw()+
 
 #also we can manipulate e.g. the legend
 #extract the legend from a plot
-p_legend <- get_legend(ls_graph$CN_mean+ theme(legend.position = "bottom", legend.background = element_blank()))
+p_legend <- get_legend(ls_graph$CN_mean+ theme(legend.position = "bottom"))
 ggdraw()+
   draw_plot(ls_graph$CN_mean + theme(legend.position = "none"), x = 0 , y=0, width = 0.5, height = 1)+
-  draw_plot(ls_graph$C_mean + theme(legend.position = "none") , x = 0.5 , y=0.5, width = 0.5, height = 0.5)+
+  draw_plot(ls_graph$C_mean + theme(legend.position = "none"), x = 0.5 , y=0.5, width = 0.5, height = 0.5)+
   draw_plot(ls_graph$N_mean + theme(legend.position = "none"), x = 0.5 , y=0, width = 0.5, height = 0.5)+
   draw_plot_label(label = c("A","B","C"), x = c(0, 0.5, 0.5), y = c(1,1,0.5))+
-  draw_grob(p_legend, 0, -0.46)# add the legend. And change the position wiht the numbers (first number = left right , second numer = top down)
+  draw_grob(p_legend, 0, -0.45)# add the legend. And change the position wiht the numbers (first number = left right , second numer = top down)
 
 #you can also manipulate the plot in here (more changes to the plot theme or the axis position...)
 
-###
+######
 #Statistic & Plot - automation with NIRS results
-###
+######
 nirs <- read.csv("Data/NIRS_WS.csv")
 nirs$year <- as.factor(nirs$year)
 str(nirs)
@@ -1083,74 +1083,4 @@ for(r in levels(cSig$Response)){
     print(tmp_graph)
     assign(paste(r, i, sep = "_"), tmp_graph )
   }
-}
-
-
-
-#####
-#SCRAP
-#####
-
-##Tried to write a function to rename a specific column
-colnames(sm_list[[1]])[1] <- "Date"
-
-new_col_name <- function(data = x, column = a, new_name = b){
-  colnames(x)[a] <- "Date"
-}
-b <- "b"
-paste0(b)
-
-
-
-#purrr ------ NO CLUE
-test <- map(sm_list, function(x) x$Site <- print(colnames(x)[1]))
-test <- map(sm_list, function(x) rowMeans(x[ ,c(2:6)], na.rm=T))
-test <- map_dfr(sm_list, `[`, c(1:6))
-test <- map_dfr(sm_list, extract, c(1:6))
-
-map(sm_list, `[`,c("SM2", "SM5")) %>%
-  mutate(SM_mean_15 = rowMeans(.,na.rm=TRUE))
-#-----RLY NO CLUE!
-
-test <- function(My.Data, Jahr, param){
-  My.Data %>%
-    filter(., Jahr == levels(year), param == levels(Response)) %>%
-    ggplot(data = ., aes(x=dT, y=lsmean, color = Treatment))+
-    geom_point(size=3,position=position_dodge(.6))+
-    geom_errorbar(aes(ymax= lsmean+SE, ymin= lsmean-SE, color = Treatment),lwd=1 ,  width=0.01, position=position_dodge(.6))+
-    geom_text(aes(label=let, x=dT, y= ast_mean*0.93), fontface = "bold", color= "black", size = 5, show.legend = F, vjust = 0)+ #Add Asteriks for EXT-vs-INT comparison
-    geom_text(aes(label=.group, x=dT, y=let_mean, color = Treatment), fontface = "bold", position=position_dodge(.6))+ #Add Grouping Letters
-    scale_color_manual(name = "Treatment",
-                       values= c("#91bfdb", "#fc8d59"))+
-    facet_wrap(~plotO, scales = "free_x")+
-    labs(x="")+
-    theme(legend.position = "bottom")
-}
-
-test(My.Data = cSig, Jahr = year, param = Response)
-
-cSig %>% 
-  filter(., year == "2017", Response == "pProt") %>%
-  ggplot(data = ., aes(x=dT, y=lsmean, color = Treatment))+
-  geom_point(size=3,position=position_dodge(.6))+
-  geom_errorbar(aes(ymax= lsmean+SE, ymin= lsmean-SE, color = Treatment),lwd=1 ,  width=0.01, position=position_dodge(.6))+
-  geom_text(aes(label=let, x=dT, y= ast_mean*0.93), fontface = "bold", color= "black", size = 5, show.legend = F, vjust = 0)+ #Add Asteriks for EXT-vs-INT comparison
-  geom_text(aes(label=.group, x=dT, y=let_mean, color = Treatment), fontface = "bold", position=position_dodge(.6))+ #Add Grouping Letters
-  scale_color_manual(name = "Treatment",
-                     values= c("#91bfdb", "#fc8d59"))+
-  facet_wrap(~plotO, scales = "free_x")+
-  labs(x="")+
-  theme(legend.position = "bottom")
-
-graph_fun = function(x) {
-  O2.data %>% 
-    ggplot() + 
-    aes(Time_hrs, O2_muL_hr, col = Machine) + 
-    geom_point() + 
-    geom_line() + 
-    theme_bw() + 
-    ylab(O[2]~(mu*l~ hr^-1)) +
-    xlab("Incubation time (hrs)") +
-    facet_wrap_paginate(vars(Date, Channel, Sample_ID), ncol = 3, nrow = 3, page = x)
-  # note that x is the place holder for number of pages
 }
